@@ -1,6 +1,9 @@
 export default {
 	bind(el, {value, modifiers}) {
-		if (value) return
+		console.log(value)
+		if (value==='') {
+			return
+		}
 		el.setAttribute('j-tooltip', value)
 		el.classList.add('j-tooltip')
 		if (modifiers.inline) {

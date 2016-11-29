@@ -10,6 +10,9 @@
     "lint": "eslint --ext .js,.vue src"
   },
   "dependencies": {
+    "stylus": "^0.54.5",
+    "stylus-loader": "^2.4.0",
+    "tether": "^1.3.8",
     "vue": "^2.1.0"
   },
   "devDependencies": {
