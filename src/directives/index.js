@@ -1,4 +1,4 @@
-import tooltip from './tooltip.js'
+import tooltip from './tooltip/tooltip.js'
 import multiuploader from './multiuploader.js'
 
 export {

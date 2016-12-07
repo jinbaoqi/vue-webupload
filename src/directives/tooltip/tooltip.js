@@ -1,6 +1,5 @@
 export default {
 	bind(el, {value, modifiers}) {
-		console.log(value)
 		if (value==='') {
 			return
 		}

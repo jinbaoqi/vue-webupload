@@ -2,9 +2,9 @@
  * Created by matt_jin on 22/11/2016.
  */
 import Vue from 'vue'
-import {event,merge} from '../utils/event'
+import {event,merge,getParams} from '../utils/event'
 let defaults = {
-	auto:true,//是否自动上传
+	auto:false,//是否自动上传
 	accept: {
 		title: 'Images',
 		extensions: 'gif,jpg,jpeg,png',
@@ -30,7 +30,7 @@ let defaults = {
 		// 否则强制转换成指定的类型。
 		type: 'image/jpeg'
 	},
-	server:utils.getParams('/tenant/fileupload/image')
+	// server:getParams('/tenant/fileupload/image')
 
 }
 const makePointer = (()=>{
@@ -39,7 +39,6 @@ const makePointer = (()=>{
 		init(...arg){//第一参数是dom元素，第二参数是callback
 			[el,cb] = arg
 			if(!el){
-				console.warn('需要传递一个dom对象给该函数')
 			}
 			$(el).css('cursor','pointer')
 			cb && cb(el)//可以配置传递的option对象更改当前dom的样式
@@ -53,7 +52,6 @@ const afterFileQueued = (()=>{
 		init(...arg){//第一参数是uploader实例，第二参数是callback
 			[_uploader,cb] = arg
 			if(!_uploader){
-				console.error('请调用m_uploader方法的getUploader()传递一个uploader给你')
 				return
 			}
 
@@ -66,7 +64,6 @@ const afterFileQueued = (()=>{
 			// obj.url = _file.src
 			// obj.file = _file
 			cb && cb(obj)
-			// console.log(obj)
 			return this
 		},
 		setCallBack(_cb){////第一参数是callback
@@ -83,7 +80,6 @@ const afterFileQueued = (()=>{
 			let num = -1
 			num = _uploader.getFiles().length
 			cb && cb(num)
-			// console.log(num)
 			return this
 		},
 		getFiles(...arg){//第一参数是callback
@@ -109,7 +105,6 @@ const m_uploader = (() =>{
 			dom.style.visibility='hidden'
 			dom.innerHTML=`WebUploader_Btn`
 			el.appendChild(dom)
-			// console.log(el,dom)
 		}
 	}
 
@@ -118,9 +113,7 @@ const m_uploader = (() =>{
 	 * @param arg
 	 */
 	function renderUploader(...arg) {
-		console.dirxml(dom,'wowowowowo')
 		if(dom){
-			console.log(uploader)
 			if(!uploader){
 				let [option] = arg
 				options = merge({},defaults,options,option)
@@ -128,11 +121,9 @@ const m_uploader = (() =>{
 				afterFileQueued.init(uploader)
 			}
 			label = $(el).find('label')//还没有渲染webuploader
-			// console.log(label)
 			uploader.on('error',function (type) {
 				switch (type.toString().toUpperCase()){
 					case 'F_EXCEED_SIZE':
-						console.warn('超过5M，请重新选择')
 						break;
 					case 'Q_EXCEED_NUM_LIMIT':
 						alert('超出数量限制')
@@ -143,7 +134,6 @@ const m_uploader = (() =>{
 
 			})
 			uploader.on('uploadAccept',(obj,ret) => {
-				// console.log(ret)
 				utils.filterResponse(ret)
 			})
 			/**
@@ -151,7 +141,6 @@ const m_uploader = (() =>{
 			 */
 			uploader.on('fileQueued',function (_file) {
 				file = _file
-				// console.dir(file)
 				uploader.makeThumb(file,(err,src) => {
 					if(err){
 						afterFileQueued.setObj((obj) => {
@@ -162,7 +151,6 @@ const m_uploader = (() =>{
 						return
 					}
 					afterFileQueued.getFileLength().getFiles(function (files) {
-						// console.dir(files)
 					}).setObj(function (obj) {
 						obj.id = file.id
 						obj.file = file
@@ -170,18 +158,14 @@ const m_uploader = (() =>{
 						obj.url = src
 						obj.name = options.name
 						event.emit('MUP',obj)
-						// console.dir(obj)
 					})
 				})
 
 
 			})
 			uploader.on('uploadSuccess',(_file,res) => {
-				// console.log(_file)
-				// console.dir(res)
 				let data=merge({},{id:_file.id},res)
 				event.emit('MUP::SUCCESS',data)
-				// console.dir(uploader)
 				uploader.reset()
 				uploader.removeFile(_file,true)
 			})
@@ -191,11 +175,9 @@ const m_uploader = (() =>{
 		let [cb] = arg
 		if(label){
 			$(el).on('click',() => {
-				// console.log('clicked')
 				label.click()
 			})
 		}else{
-			console.warn('no label')
 		}
 	}
 	return {
@@ -223,7 +205,6 @@ const m_uploader = (() =>{
 		makeUpload(...arg){//第一参数是callback
 			let [cb] = arg
 			cb && cb(label)
-			// console.log(label)
 			return this
 		},
 		mergeOptions(...arg){//第一参数是配置对象，第二参数是callback(options)
@@ -251,7 +232,6 @@ const bindEvent = (() => {
 		init(...arg){//第一参数是dom对象
 			[el] = arg
 			if(!el) {
-				console.warn('请现在init方法传递el的实参')
 			}
 			return this
 		},
@@ -260,11 +240,9 @@ const bindEvent = (() => {
 				label=$(el).find('label')
 			}
 			$(el).on('click',function (e) {
-				// console.log('label')
 				if(label.get(0)){
 					label.get(0).click()
 				}else{
-					console.error('no laebel')
 				}
 
 			})
@@ -280,36 +258,27 @@ let timer = null
 const multipicupload = {
 	bind(el,binding,vnode){
 		//let listData = el.dataset.list
-		console.log('binding...')
 		m_uploader.init(el)
 		makePointer.init(el)
 	},
 	update(el,binding,vnode){
-		console.log('updating...')
 		m_uploader.init(el)
 		makePointer.init(el)
 	},
 	inserted(el,binding,vnode){
 		m_uploader.init(el)
 		makePointer.init(el)
-		console.log('inserteding...')
-		// console.dir(binding)
 		let {value} = binding
 		if(!value.name){
-			console.warn('需要给directive绑定一个name值')
 		}
 		m_uploader.mergeOptions(value,() => {
-			console.log('mergeOver')
 		}).makeInstance(function (...arg) {
 			let [dom] = arg
-			console.dirxml(dom)
 		}).makeUpload(function (...arg) {
 			// let [label] = arg
-			// console.dir(label)
 		})
 
 		Vue.nextTick(()=>{
-			console.log(el)
 			let label = $(el).find('label').get(0)
 			let a = 1
 			let t = +new Date
@@ -317,16 +286,13 @@ const multipicupload = {
 				timer = setInterval(() =>{
 					if(label){
 						clearInterval(timer)
-						// console.log(label)
 						bindEvent.init(el).bindEv()
 						return
 					}
 					if((+new Date())-t>10000){
 						clearInterval(timer)
-						console.error('超过时间没有获得数据')
 						return
 					}
-					console.log(a++)
 					label = $(el).find('label').get(0)
 				},300)
 			}
@@ -334,8 +300,6 @@ const multipicupload = {
 		})
 	},
 	unbind(el){
-		console.log('unbind....')
-		console.log(m_uploader.getUploader())
 		m_uploader.getUploader().request('destroy')
 		m_uploader.destroyUploader()
 		// m_uploader.getUploader() && m_uploader.getUploader().destroy()
